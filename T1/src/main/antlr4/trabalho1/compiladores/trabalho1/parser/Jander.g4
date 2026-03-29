@@ -32,9 +32,9 @@ IDENT    : [a-zA-Z_] [a-zA-Z0-9_]* ;
 
 WS : [ \t\r\n]+ -> skip ;
 
-COMENTARIO : '{' .*? '}' -> skip ;
+COMENTARIO: '{' (~'\n')*? '}' -> skip;
 
-COMENTARIO_NAO_FECHADO : '{' .*? ;
+COMENTARIO_NAO_FECHADO: '{' (~'}')*? '\n';
 
 CADEIA_NAO_FECHADA : '"' (~["\r\n])* ;
 
