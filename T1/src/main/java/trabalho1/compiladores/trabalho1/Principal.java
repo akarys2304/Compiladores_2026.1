@@ -1,9 +1,10 @@
 package trabalho1.compiladores.trabalho1;
 
+//importações necessárias para a definição da gramática
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.Token;
-import trabalho1.compiladores.trabalho1.parser.Jander;
+import trabalho1.compiladores.trabalho1.parser.Jander; //foi criado um arquivo .g4 contendo toda a gramática da linguagem a ser analisada
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -11,6 +12,7 @@ import java.nio.file.Paths;
 
 public class Principal {
 
+    //Função principal responsável por chamar todas as outras que realizam a lógica do analisador léxico
     public static void main(String[] args) {
         if (args.length < 2) {
             System.err.println("Uso: java -jar compilador.jar <entrada> <saida>");
@@ -24,6 +26,7 @@ public class Principal {
             CharStream cs = CharStreams.fromPath(Paths.get(arquivoEntrada));
             Jander lexer = new Jander(cs);
             
+            //lógica de leitura dos caracteres para determinar o tipo de token
             Token t;
             while ((t = lexer.nextToken()).getType() != Token.EOF) {
                 String nomeTipo = Jander.VOCABULARY.getDisplayName(t.getType());
@@ -44,11 +47,12 @@ public class Principal {
         }
     }
 
-    
+    //Tratamento de erros
     private static boolean Erro(String nome) {
         return nome.equals("COMENTARIO_NAO_FECHADO") || nome.equals("CADEIA_NAO_FECHADA") || nome.equals("INVALIDO");
     }
 
+    //Mensagem para os erros
     private static String gerarMensagemErro(int linha, String texto, String nome) {
         if (nome.equals("CADEIA_NAO_FECHADA")) {
             return "Linha " + linha + ": cadeia literal nao fechada";
@@ -58,6 +62,7 @@ public class Principal {
         return "Linha " + linha + ": " + texto + " - simbolo nao identificado";
     }
 
+    //Formatação correta para as saídas geradas pelo analisador.
     private static String formatarSaida(String lexema, String tipo) {
         if (tipo.equals("IDENT") || tipo.equals("CADEIA") || 
             tipo.equals("NUM_INT") || tipo.equals("NUM_REAL")) {
