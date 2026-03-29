@@ -2,8 +2,11 @@
 
 Alunos: 
 Karys Cristina da Silva Barbosa - 811871
+
 Nathália Brasilino Gimenes - 812076
+
 Pedro Henrique Ghiotto - 812115
+
 
 Este projeto foi desenvolvido utilizando a linguagem de programação Java criado com maven para facilitar os detalhes de compilação e build. 
 
