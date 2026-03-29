@@ -12,7 +12,6 @@ import java.nio.file.Paths;
 public class Principal {
 
     public static void main(String[] args) {
-        // O corretor automático sempre passa dois argumentos: entrada e saida
         if (args.length < 2) {
             System.err.println("Uso: java -jar compilador.jar <entrada> <saida>");
             return;
@@ -22,7 +21,6 @@ public class Principal {
         String arquivoSaida = args[1];
 
         try (PrintWriter escritor = new PrintWriter(arquivoSaida)) {
-            // Leitura do arquivo de entrada
             CharStream cs = CharStreams.fromPath(Paths.get(arquivoEntrada));
             Jander lexer = new Jander(cs);
             
@@ -32,13 +30,12 @@ public class Principal {
                 String lexema = t.getText();
                 int linha = t.getLine();
 
-                // 1. Tratamento de Erros (Para no primeiro erro encontrado)
-                if (ehTokenDeErro(nomeTipo)) {
+                if (Erro(nomeTipo)) {
                     escritor.println(gerarMensagemErro(linha, lexema, nomeTipo));
-                    return; // O manual do professor costuma pedir para parar no primeiro erro
+                    escritor.flush();
+                    return; 
                 }
 
-                // 2. Formatação da Saída de Sucesso
                 escritor.println(formatarSaida(lexema, nomeTipo));
             }
 
@@ -47,40 +44,26 @@ public class Principal {
         }
     }
 
-    /**
-     * Identifica se o token é um dos tokens de erro definidos no seu .g4
-     */
-    private static boolean ehTokenDeErro(String nome) {
-        return nome.contains("ERRO") || 
-               nome.contains("INVALIDO") || 
-               nome.contains("NAO_FECHAD");
+    
+    private static boolean Erro(String nome) {
+        return nome.equals("COMENTARIO_NAO_FECHADO") || nome.equals("CADEIA_NAO_FECHADA") || nome.equals("INVALIDO");
     }
 
-    /**
-     * Formata a mensagem de erro conforme o padrão da apostila
-     */
     private static String gerarMensagemErro(int linha, String texto, String nome) {
-        if (nome.contains("CADEIA")) {
+        if (nome.equals("CADEIA_NAO_FECHADA")) {
             return "Linha " + linha + ": cadeia literal nao fechada";
-        } else if (nome.contains("COMENTARIO")) {
+        } else if (nome.equals("COMENTARIO_NAO_FECHADO")) {
             return "Linha " + linha + ": comentario nao fechado";
         }
-        // Para o token INVALIDO (.)
         return "Linha " + linha + ": " + texto + " - simbolo nao identificado";
     }
 
-    /**
-     * Lógica crucial: decide se mostra o nome do tipo ou se repete o lexema
-     */
     private static String formatarSaida(String lexema, String tipo) {
-        // Apenas IDENT, CADEIA e NUMEROS exibem o nome do tipo no segundo campo
         if (tipo.equals("IDENT") || tipo.equals("CADEIA") || 
             tipo.equals("NUM_INT") || tipo.equals("NUM_REAL")) {
             return "<'" + lexema + "'," + tipo + ">";
         } 
         
-        // Para TODO O RESTO (palavras-chave como 'inteiro', 'logico', e símbolos como '+', '<-')
-        // o padrão é repetir o próprio lexema entre aspas simples.
         return "<'" + lexema + "','" + lexema + "'>";
     }
 }
