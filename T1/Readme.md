@@ -20,7 +20,7 @@ Este projeto foi desenvolvido utilizando a linguagem de programação Java criad
 Após compilar e buildar o projeto já é possível executar o código do nosso analisador léxico. 
 
 ### Como rodar o analisador léxico: 
-java -jar target/trabalho1-1.0-SNAPSHOT-jar-with-dependencies.jar <caminho arquivo entrada> <caminho arquivo saida>
+java -jar target/trabalho1-1.0-SNAPSHOT-jar-with-dependencies.jar (caminho arquivo entrada) (caminho arquivo saida)
 
 
 
