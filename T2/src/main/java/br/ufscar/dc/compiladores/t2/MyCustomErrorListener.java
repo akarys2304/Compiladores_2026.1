@@ -1,0 +1,47 @@
+package br.ufscar.dc.compiladores.t2;
+
+import java.io.PrintWriter;
+import org.antlr.v4.runtime.*;
+
+public class MyCustomErrorListener extends BaseErrorListener {
+
+    private PrintWriter pw;
+
+    public MyCustomErrorListener(PrintWriter pw) {
+        this.pw = pw;
+    }
+
+    @Override
+    public void syntaxError(Recognizer<?, ?> recognizer,
+                            Object offendingSymbol,
+                            int line,
+                            int charPositionInLine,
+                            String msg,
+                            RecognitionException e) {
+
+        Token t = (Token) offendingSymbol;
+
+        String tipo = JanderLexer.VOCABULARY.getDisplayName(t.getType());
+        String mensagem;
+
+        if ("INVALIDO".equals(tipo)) {
+            mensagem = "Linha " + line + ": " + t.getText() + " - simbolo nao identificado";
+        } 
+        else if ("CADEIA_NAO_FECHADA".equals(tipo)) {
+            mensagem = "Linha " + line + ": cadeia literal nao fechada";
+        } 
+        else if ("<EOF>".equals(t.getText())) {
+            mensagem = "Linha " + line + ": erro sintatico proximo a EOF";
+        } 
+        else {
+            mensagem = "Linha " + line + ": erro sintatico proximo a " + t.getText();
+        }
+
+        pw.println(mensagem);
+        pw.println("Fim da compilacao");
+
+    
+        throw new RuntimeException();
+    }
+}
+

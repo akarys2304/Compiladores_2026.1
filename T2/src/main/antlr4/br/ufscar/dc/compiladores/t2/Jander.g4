@@ -1,70 +1,73 @@
 grammar Jander;
 
-// REGRAS LÉXICAS (TOKENS)
+// -------------------
+// LÉXICO
+// -------------------
 
-// Palavras-chave transformadas em tokens individuais
-ALGORITMO    : 'algoritmo';
-DECLARE      : 'declare';
-LEIA         : 'leia';
-ESCREVA      : 'escreva';
-FIM_ALGORITMO: 'fim_algoritmo';
-SE           : 'se';
-ENTAO        : 'entao';
-SENAO        : 'senao';
-FIM_SE       : 'fim_se';
-PARA         : 'para';
-FIM_PARA     : 'fim_para';
-ENQUANTO     : 'enquanto';
-FIM_ENQUANTO : 'fim_enquanto';
-FACA         : 'faca';
-ATE          : 'ate';
-RETORNE      : 'retorne';
-INTEIRO      : 'inteiro';
-REAL         : 'real';
-LITERAL      : 'literal';
-LOGICO       : 'logico';
-VERDADEIRO   : 'verdadeiro';
-FALSO        : 'falso';
+ALGORITMO     : 'algoritmo';
+DECLARE       : 'declare';
+LEIA          : 'leia';
+ESCREVA       : 'escreva';
+FIM_ALGORITMO : 'fim_algoritmo';
 
-// Operadores
-OP_ARIT_SOMA : '+' | '-';
-OP_ARIT_MULT : '*' | '/' | '%';
-OP_RELAC     : '>' | '<' | '>=' | '<=' | '<>' | '=';
-OP_BOOL_E    : 'e';
-OP_BOOL_OU   : 'ou';
-OP_BOOL_NAO  : 'nao';
+SE            : 'se';
+ENTAO         : 'entao';
+SENAO         : 'senao';
+FIM_SE        : 'fim_se';
 
+ENQUANTO      : 'enquanto';
+FIM_ENQUANTO  : 'fim_enquanto';
+FACA          : 'faca';
+
+INTEIRO       : 'inteiro';
+REAL          : 'real';
+LITERAL       : 'literal';
+LOGICO        : 'logico';
+VERDADEIRO    : 'verdadeiro';
+FALSO         : 'falso';
+
+// Operadores e símbolos
 ATRIB        : '<-';
 DELIM        : ':';
 VIRGULA      : ',';
 ABREPAR      : '(';
 FECHAPAR     : ')';
-PONTO        : '.';
 
-// Identificadores e Números
+OP_ARIT_SOMA : '+' | '-';
+OP_ARIT_MULT : '*' | '/';
+OP_RELAC     : '>' | '<' | '>=' | '<=' | '<>' | '=';
+OP_BOOL_E    : 'e';
+OP_BOOL_OU   : 'ou';
+OP_BOOL_NAO  : 'nao';
+
+// Identificadores e números
 IDENT    : [a-zA-Z_] [a-zA-Z0-9_]* ;
 NUM_REAL : [0-9]+ '.' [0-9]+ ;
 NUM_INT  : [0-9]+ ;
 
+// Cadeias
 CADEIA : '"' (~["\\\r\n] | ESC_SEQ)* '"' ;
-fragment ESC_SEQ : '\\' . ; 
+fragment ESC_SEQ : '\\' . ;
 
+// Ignorar espaços e comentários
 WS : [ \t\r\n]+ -> skip ;
-COMENTARIO: '{' .*? '}' -> skip;
+COMENTARIO : '{' ~('}')* '}' -> skip ;
 
-// Erros léxicos básicos
+// Erros léxicos
 CADEIA_NAO_FECHADA : '"' (~["\r\n])* ;
 INVALIDO : . ;
 
-// REGRAS SINTÁTICAS
+// -------------------
+// SINTÁTICO
+// -------------------
 
 programa
-    : ALGORITMO listaDeclaracoes corpo FIM_ALGORITMO
+    : ALGORITMO declaracoes corpo FIM_ALGORITMO EOF
     ;
 
-listaDeclaracoes
-    : DECLARE (declaracao)+
-    | // vazio
+// permite vários declares depois do algoritmo
+declaracoes
+    : (DECLARE declaracao)*
     ;
 
 declaracao
@@ -72,12 +75,20 @@ declaracao
     ;
 
 tipo
-    : INTEIRO | REAL | LITERAL | LOGICO
+    : INTEIRO
+    | REAL
+    | LITERAL
+    | LOGICO
     ;
 
+// corpo pode ser vazio (IMPORTANTE pra bater com corretor)
 corpo
-    : (comando)*
+    : comando*
     ;
+
+// -------------------
+// COMANDOS
+// -------------------
 
 comando
     : comandoLeia
@@ -100,14 +111,17 @@ comandoAtribuicao
     ;
 
 comandoCondicao
-    : SE expressao ENTAO corpo (SENAO corpo)? FIM_SE
+    : SE expressao ENTAO comando* (SENAO comando*)? FIM_SE
     ;
 
 comandoRepeticao
-    : ENQUANTO expressao FACA corpo FIM_ENQUANTO
+    : ENQUANTO expressao FACA comando* FIM_ENQUANTO
     ;
 
-// Hierarquia de Expressões (Trata precedência)
+// -------------------
+// EXPRESSÕES
+// -------------------
+
 expressao
     : termoRelacional (OP_BOOL_OU termoRelacional)*
     ;
