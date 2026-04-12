@@ -19,6 +19,11 @@ ENQUANTO      : 'enquanto';
 FIM_ENQUANTO  : 'fim_enquanto';
 FACA          : 'faca';
 
+// 🔥 NOVOS TOKENS (necessários)
+PARA          : 'para';
+ATE           : 'ate';
+FIM_PARA      : 'fim_para';
+
 INTEIRO       : 'inteiro';
 REAL          : 'real';
 LITERAL       : 'literal';
@@ -49,23 +54,24 @@ NUM_INT  : [0-9]+ ;
 CADEIA : '"' (~["\\\r\n] | ESC_SEQ)* '"' ;
 fragment ESC_SEQ : '\\' . ;
 
-// Ignorar espaços e comentários
+// Comentários e espaços
 WS : [ \t\r\n]+ -> skip ;
-COMENTARIO : '{' ~('}')* '}' -> skip ;
+COMENTARIO : '{' ~('}'|'\n')* '}' -> skip ;
+COMENTARIO_NAO_FECHADO: '{' ~('}'|'\n')* '\n';
 
 // Erros léxicos
-CADEIA_NAO_FECHADA : '"' (~["\r\n])* ;
-INVALIDO : . ;
+CADEIA_NAO_FECHADA : '"' (~["\r\n])* '\n';
+ERRO : . ;
 
 // -------------------
 // SINTÁTICO
 // -------------------
 
 programa
-    : ALGORITMO declaracoes corpo FIM_ALGORITMO EOF
+    : declaracoes ALGORITMO corpo FIM_ALGORITMO EOF
     ;
 
-// permite vários declares depois do algoritmo
+// mantém simples
 declaracoes
     : (DECLARE declaracao)*
     ;
@@ -81,9 +87,9 @@ tipo
     | LOGICO
     ;
 
-// corpo pode ser vazio (IMPORTANTE pra bater com corretor)
+// 🔥 CORREÇÃO IMPORTANTE: permitir declare dentro do corpo
 corpo
-    : comando*
+    : (DECLARE declaracao | comando)*
     ;
 
 // -------------------
@@ -96,6 +102,12 @@ comando
     | comandoAtribuicao
     | comandoCondicao
     | comandoRepeticao
+    | comandoPara
+    ;
+
+// 🔥 NOVO (mínimo necessário)
+comandoPara
+    : PARA IDENT ATRIB expressao (ATE expressao)? FACA comando* FIM_PARA
     ;
 
 comandoLeia

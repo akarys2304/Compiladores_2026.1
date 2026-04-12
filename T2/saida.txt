@@ -1,2 +1,2 @@
-Linha 14: erro sintatico proximo a EOF
+Linha 5: erro sintatico proximo a registro
 Fim da compilacao

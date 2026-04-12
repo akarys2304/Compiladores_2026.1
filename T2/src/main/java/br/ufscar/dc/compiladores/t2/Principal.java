@@ -33,7 +33,6 @@ public class Principal {
 
         try {
             parser.programa();
-            writer.println("Fim da compilacao");
         } catch (RuntimeException e) {
             // erro já tratado no listener
         }

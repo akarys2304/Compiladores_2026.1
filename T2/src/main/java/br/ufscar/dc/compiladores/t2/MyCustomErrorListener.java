@@ -24,7 +24,7 @@ public class MyCustomErrorListener extends BaseErrorListener {
         String tipo = JanderLexer.VOCABULARY.getDisplayName(t.getType());
         String mensagem;
 
-        if ("INVALIDO".equals(tipo)) {
+        if ("ERRO".equals(tipo)) {
             mensagem = "Linha " + line + ": " + t.getText() + " - simbolo nao identificado";
         } 
         else if ("CADEIA_NAO_FECHADA".equals(tipo)) {
@@ -32,7 +32,10 @@ public class MyCustomErrorListener extends BaseErrorListener {
         } 
         else if ("<EOF>".equals(t.getText())) {
             mensagem = "Linha " + line + ": erro sintatico proximo a EOF";
-        } 
+        }
+        else if("COMENTARIO_NAO_FECHADO".equals(tipo)) {
+            mensagem = "Linha " + line + ": comentario nao fechado";
+        }
         else {
             mensagem = "Linha " + line + ": erro sintatico proximo a " + t.getText();
         }
