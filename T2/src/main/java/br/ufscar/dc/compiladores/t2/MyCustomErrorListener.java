@@ -24,6 +24,7 @@ public class MyCustomErrorListener extends BaseErrorListener {
         String tipo = JanderLexer.VOCABULARY.getDisplayName(t.getType());
         String mensagem;
 
+        //classifica o tipo de erro com base no token e na mensagem de erro
         if ("ERRO".equals(tipo)) {
             mensagem = "Linha " + line + ": " + t.getText() + " - simbolo nao identificado";
         } 
@@ -40,6 +41,7 @@ public class MyCustomErrorListener extends BaseErrorListener {
             mensagem = "Linha " + line + ": erro sintatico proximo a " + t.getText();
         }
 
+        //escreve a mensagem de erro e encerrar a compilação
         pw.println(mensagem);
         pw.println("Fim da compilacao");
 

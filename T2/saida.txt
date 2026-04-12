@@ -1,2 +1,2 @@
-Linha 5: erro sintatico proximo a registro
+Linha 8: erro sintatico proximo a declare
 Fim da compilacao
