@@ -48,6 +48,44 @@ public class AnalisadorSemantico extends JanderBaseVisitor<Void> {
         return super.visitCmdEscreva(ctx);
     }
 
+    @Override
+    public Void visitCmdAtribuicao(JanderParser.CmdAtribuicaoContext ctx) {
+        String nome = ctx.identificador().IDENT(0).getText();
+        var entrada = escopos.verificar(nome);
+        if (entrada == null) {
+            AnalisadorSemanticoUtils.adicionarErroSemantico(
+                    ctx.identificador().IDENT(0).getSymbol(),
+                    "identificador " + nome + " nao declarado");
+        } else {
+            TipoLA tipoVar = entrada.tipo;
+            TipoLA tipoExpr = AnalisadorSemanticoUtils.verificarTipo(escopos, ctx.expressao());
+            if (!AnalisadorSemanticoUtils.tiposCompativeis(tipoVar, tipoExpr)) {
+                AnalisadorSemanticoUtils.adicionarErroSemantico(
+                        ctx.identificador().IDENT(0).getSymbol(),
+                        "atribuicao nao compativel para " + nome);
+            }
+        }
+        return super.visitCmdAtribuicao(ctx);
+    }
+
+    @Override
+    public Void visitCmdEnquanto(JanderParser.CmdEnquantoContext ctx) {
+        AnalisadorSemanticoUtils.verificarTipo(escopos, ctx.expressao());
+        return super.visitCmdEnquanto(ctx);
+    }
+
+    @Override
+    public Void visitCmdSe(JanderParser.CmdSeContext ctx) {
+        AnalisadorSemanticoUtils.verificarTipo(escopos, ctx.expressao());
+        return super.visitCmdSe(ctx);
+    }
+
+    @Override
+    public Void visitCmdFaca(JanderParser.CmdFacaContext ctx) {
+        AnalisadorSemanticoUtils.verificarTipo(escopos, ctx.expressao());
+        return super.visitCmdFaca(ctx);
+    }
+
     private void processarDeclaracaoVariavel(JanderParser.VariavelContext ctx,
             CategoriaSimbolos categoria) {
         TipoLA tipo;

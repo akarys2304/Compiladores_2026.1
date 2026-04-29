@@ -96,11 +96,22 @@ public class AnalisadorSemanticoUtils {
         if (ctx.identificador() != null) {
             String nome = ctx.identificador().IDENT(0).getText();
             var entrada = escopos.verificar(nome);
-            return (entrada != null) ? entrada.tipo : TipoLA.TIPO_INDEFINIDO;
+            if (entrada == null) {
+                adicionarErroSemantico(ctx.identificador().IDENT(0).getSymbol(),
+                        "identificador " + nome + " nao declarado");
+                return TipoLA.TIPO_INDEFINIDO;
+            }
+            return entrada.tipo;
         }
         if (ctx.IDENT() != null) {
-            var entrada = escopos.verificar(ctx.IDENT().getText());
-            return (entrada != null) ? entrada.tipo : TipoLA.TIPO_INDEFINIDO;
+            String nome = ctx.IDENT().getText();
+            var entrada = escopos.verificar(nome);
+            if (entrada == null) {
+                adicionarErroSemantico(ctx.IDENT().getSymbol(),
+                        "identificador " + nome + " nao declarado");
+                return TipoLA.TIPO_INDEFINIDO;
+            }
+            return entrada.tipo;
         }
         return TipoLA.TIPO_INDEFINIDO;
     }
@@ -117,6 +128,7 @@ public class AnalisadorSemanticoUtils {
     }
 
     public static TipoLA combinarTiposNumericos(TipoLA t1, TipoLA t2) {
+        if (t1 == TipoLA.LITERAL && t2 == TipoLA.LITERAL) return TipoLA.LITERAL;
         if (!ehNumerico(t1) || !ehNumerico(t2)) return TipoLA.TIPO_INDEFINIDO;
         if (t1 == TipoLA.REAL || t2 == TipoLA.REAL) return TipoLA.REAL;
         return TipoLA.INTEIRO;
