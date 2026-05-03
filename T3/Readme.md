@@ -1,4 +1,4 @@
-# Trabalho 2 - Compiladores
+# Trabalho 3 - Compiladores
 Alunos:
 - Karys Cristina da Silva Barbosa - 811871
 - Nathália Brasilino Gimenes - 812076
@@ -20,12 +20,12 @@ Após compilar e buildar o projeto já é possível executar o código do nosso 
 
 ## Como rodar o analisador sintático
 ```
-java -jar target/T2-1.0-SNAPSHOT-jar-with-dependencies.jar (caminho arquivo entrada) (caminho arquivo saida)
+java -jar target/T3-1.0-SNAPSHOT-jar-with-dependencies.jar (caminho arquivo entrada) (caminho arquivo saida)
 ```
 
 ## Exemplo de uso
 ```
-java -jar target/T2-1.0-SNAPSHOT-jar-with-dependencies.jar entrada.txt saida.txt
+java -jar target/T3-1.0-SNAPSHOT-jar-with-dependencies.jar entrada.txt saida.txt
 ```
 
 Em caso de erro, a saída conterá a linha e a descrição do problema encontrado, seguida de `Fim da compilacao`. Se nenhum erro for encontrado, o arquivo de saída será gerado vazio.
