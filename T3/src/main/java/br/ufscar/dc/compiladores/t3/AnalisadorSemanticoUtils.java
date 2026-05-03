@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class AnalisadorSemanticoUtils {
+    // Lista global para armazenar as mensagens de erro detectadas durante a análise
     public static List<String> errosSemanticos = new ArrayList<>();
 
     public static void adicionarErroSemantico(Token t, String mensagem) {
@@ -13,6 +14,7 @@ public class AnalisadorSemanticoUtils {
         errosSemanticos.add(String.format("Linha %d: %s", linha, mensagem));
     }
 
+    // Analisa o tipo resultante de uma Expressão
     public static TipoLA verificarTipo(Escopos escopos, JanderParser.ExpressaoContext ctx) {
         TipoLA ret = null;
         for (var termoCtx : ctx.termo_logico()) {
@@ -23,6 +25,7 @@ public class AnalisadorSemanticoUtils {
         return (ret != null) ? ret : TipoLA.TIPO_INDEFINIDO;
     }
 
+    // Verifica tipos em termos lógicos
     public static TipoLA verificarTipoTermoLogico(Escopos escopos, JanderParser.Termo_logicoContext ctx) {
         TipoLA ret = null;
         for (var fatorCtx : ctx.fator_logico()) {
@@ -89,10 +92,13 @@ public class AnalisadorSemanticoUtils {
         return verificarTipoParcelaNaoUnario(escopos, ctx.parcela_nao_unario());
     }
 
+    // Resolve o tipo de elementos atômicos (números, parênteses ou nomes de variáveis)
     public static TipoLA verificarTipoParcelaUnario(Escopos escopos, JanderParser.Parcela_unarioContext ctx) {
         if (ctx.NUM_INT() != null) return TipoLA.INTEIRO;
         if (ctx.NUM_REAL() != null) return TipoLA.REAL;
         if (ctx.ABREPAR() != null) return verificarTipo(escopos, ctx.expressao(0));
+        
+        // Verifica se o identificador foi declarado antes de usar seu tipo
         if (ctx.identificador() != null) {
             String nome = ctx.identificador().IDENT(0).getText();
             var entrada = escopos.verificar(nome);
@@ -103,6 +109,8 @@ public class AnalisadorSemanticoUtils {
             }
             return entrada.tipo;
         }
+
+
         if (ctx.IDENT() != null) {
             String nome = ctx.IDENT().getText();
             var entrada = escopos.verificar(nome);
@@ -120,13 +128,15 @@ public class AnalisadorSemanticoUtils {
         if (ctx.CADEIA() != null) return TipoLA.LITERAL;
         return TipoLA.TIPO_INDEFINIDO;
     }
-
+    
+    // Define quais tipos podem interagir entre si
     public static boolean tiposCompativeis(TipoLA t1, TipoLA t2) {
         if (t1 == t2) return true;
         if ((t1 == TipoLA.REAL && t2 == TipoLA.INTEIRO) || (t1 == TipoLA.INTEIRO && t2 == TipoLA.REAL)) return true;
         return false;
     }
 
+    // Regra de promoção de tipos
     public static TipoLA combinarTiposNumericos(TipoLA t1, TipoLA t2) {
         if (t1 == TipoLA.LITERAL && t2 == TipoLA.LITERAL) return TipoLA.LITERAL;
         if (!ehNumerico(t1) || !ehNumerico(t2)) return TipoLA.TIPO_INDEFINIDO;
@@ -134,10 +144,12 @@ public class AnalisadorSemanticoUtils {
         return TipoLA.INTEIRO;
     }
 
+    // Atalho para verificar se o tipo permite cálculos matemáticos
     public static boolean ehNumerico(TipoLA t) {
         return t == TipoLA.INTEIRO || t == TipoLA.REAL;
     }
 
+    // Conversor de String para o Enum interno TipoLA
     public static TipoLA stringParaTipo(String s, boolean ehPonteiro) {
         TipoLA tipo = TipoLA.TIPO_INDEFINIDO;
         switch (s) {

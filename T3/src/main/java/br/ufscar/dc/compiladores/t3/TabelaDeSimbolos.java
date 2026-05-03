@@ -6,6 +6,7 @@ import java.util.Map;
 
 public class TabelaDeSimbolos {
 
+    // Define os tipos de dados permitidos na linguagem LA
     public enum TipoLA {
         INTEIRO,
         REAL,
@@ -21,7 +22,7 @@ public class TabelaDeSimbolos {
         TIPO_INDEFINIDO  
     }
 
-    
+    // Classifica a natureza do símbolo identificado no código
     public enum CategoriaSimbolos {
         VARIAVEL,
         CONSTANTE,
@@ -30,7 +31,7 @@ public class TabelaDeSimbolos {
         TIPO
     }
 
-    
+    // Estrutura que armazena todas as informações de um identificador
     public static class EntradaTabelaDeSimbolos {
         public final String nome;
         public final TipoLA tipo;
@@ -47,7 +48,7 @@ public class TabelaDeSimbolos {
         }
     }
 
-
+    // Mapa que armazena os símbolos usando o nome como chave para busca rápida 
     private final Map<String, EntradaTabelaDeSimbolos> tabela;
 
     public TabelaDeSimbolos() {
@@ -69,12 +70,12 @@ public class TabelaDeSimbolos {
         return tabela.containsKey(nome);
     }
 
-    
+    // Recupera todos os dados de um símbolo a partir do nome
     public EntradaTabelaDeSimbolos verificar(String nome) {
         return tabela.get(nome);
     }
 
-    
+    // Retorna apenas o tipo de um símbolo; retorna TIPO_INDEFINIDO se não existir
     public TipoLA verificarTipo(String nome) {
         EntradaTabelaDeSimbolos e = tabela.get(nome);
         return (e != null) ? e.tipo : TipoLA.TIPO_INDEFINIDO;
