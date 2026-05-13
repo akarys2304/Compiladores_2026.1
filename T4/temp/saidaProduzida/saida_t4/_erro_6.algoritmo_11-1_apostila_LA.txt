@@ -1,0 +1,4 @@
+Linha 49: comando retorne nao permitido nesse escopo
+Linha 75: atribuicao nao compativel para somaVendas
+Linha 77: atribuicao nao compativel para maiorVenda
+Fim da compilacao
