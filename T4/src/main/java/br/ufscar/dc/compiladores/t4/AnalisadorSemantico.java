@@ -2,43 +2,54 @@ package br.ufscar.dc.compiladores.t4;
 
 import br.ufscar.dc.compiladores.t4.TabelaDeSimbolos.CategoriaSimbolos;
 import br.ufscar.dc.compiladores.t4.TabelaDeSimbolos.TipoLA;
-import java.util.ArrayList;
-import java.util.List;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Stack;
 
 public class AnalisadorSemantico extends JanderBaseVisitor<Void> {
 
     private Escopos escopos;
-
-    
-    private boolean dentroFuncao = false;
+    private Stack<Boolean> escopoPermiteRetorno = new Stack<>();
 
     @Override
     public Void visitPrograma(JanderParser.ProgramaContext ctx) {
         escopos = new Escopos();
+        escopoPermiteRetorno.clear();
+        escopoPermiteRetorno.push(false);
         return super.visitPrograma(ctx);
     }
 
     @Override
     public Void visitDeclaracao_local(JanderParser.Declaracao_localContext ctx) {
+        // DECLARE
         if (ctx.DECLARE() != null && ctx.variavel() != null) {
             processarDeclaracaoVariavel(ctx.variavel(), CategoriaSimbolos.VARIAVEL);
-
-        } else if (ctx.CONSTANTE() != null) {
-            String nome = ctx.IDENT().getText();
-            String strTipo = ctx.tipo_basico().getText();
-            TipoLA tipo = AnalisadorSemanticoUtils.stringParaTipo(strTipo, false);
-            verificarEInserirSimbolo(ctx.IDENT().getSymbol(), nome, tipo,
-                    CategoriaSimbolos.CONSTANTE, null);
-
-        } else if (ctx.TIPO() != null) {
-            // Define um novo tipo customizado (normalmente um registro)
-            String nome = ctx.IDENT().getText();
-            TipoLA tipo = obterTipoDoContexto(ctx.tipo());
-            verificarEInserirSimbolo(ctx.IDENT().getSymbol(), nome, tipo,
-                    CategoriaSimbolos.TIPO, nome);
         }
-        return super.visitDeclaracao_local(ctx);
+        // CONSTANTE
+        else if (ctx.CONSTANTE() != null) {
+            String nome = ctx.IDENT().getText();
+            TipoLA tipo = AnalisadorSemanticoUtils.stringParaTipo(ctx.tipo_basico().getText(), false);
+            verificarEInserirSimbolo(ctx.IDENT().getSymbol(), nome, tipo, CategoriaSimbolos.CONSTANTE, null, null);
+        }
+        // TIPO
+        else if (ctx.TIPO() != null) {
+            String nomeTipo = ctx.IDENT().getText();
+            Map<String, TipoLA> campos = new HashMap<>();
+
+            if (ctx.tipo().registro() != null) {
+                for (var variavel : ctx.tipo().registro().variavel()) {
+                    TipoLA tipoCampo = obterTipoVariavel(variavel);
+                    for (var ident : variavel.identificador()) {
+                        campos.put(ident.IDENT(0).getText(), tipoCampo);
+                    }
+                }
+            }
+            verificarEInserirSimbolo(ctx.IDENT().getSymbol(), nomeTipo, TipoLA.REGISTRO, CategoriaSimbolos.TIPO, nomeTipo, campos);
+        }
+        return null;
     }
 
     @Override
@@ -48,92 +59,67 @@ public class AnalisadorSemantico extends JanderBaseVisitor<Void> {
         } else if (ctx.funcao() != null) {
             visitarFuncao(ctx.funcao());
         }
-        return null; // não chama super: tratamos manualmente
+        return null;
     }
 
     private void visitarProcedimento(JanderParser.ProcedimentoContext ctx) {
         String nome = ctx.IDENT().getText();
-
         List<TipoLA> tiposParam = new ArrayList<>();
         List<String> nomesRegParam = new ArrayList<>();
+
         if (ctx.parametros() != null) {
             coletarTiposParametros(ctx.parametros(), tiposParam, nomesRegParam);
         }
 
         TabelaDeSimbolos escopoAtual = escopos.obterEscopoAtual();
         if (escopoAtual.existe(nome)) {
-            AnalisadorSemanticoUtils.adicionarErroSemantico(ctx.IDENT().getSymbol(),
-                    "identificador " + nome + " ja declarado anteriormente");
+            AnalisadorSemanticoUtils.adicionarErroSemantico(ctx.IDENT().getSymbol(), "identificador " + nome + " ja declarado anteriormente");
         } else {
-            escopoAtual.adicionarFuncaoOuProcedimento(nome, TipoLA.VOID,
-                    CategoriaSimbolos.PROCEDIMENTO, tiposParam, nomesRegParam);
+            escopoAtual.adicionarFuncaoOuProcedimento(nome, TipoLA.VOID, CategoriaSimbolos.PROCEDIMENTO, tiposParam, nomesRegParam);
         }
 
         escopos.criarNovoEscopo();
-        boolean estadoAnterior = dentroFuncao;
-        dentroFuncao = false; 
+        escopoPermiteRetorno.push(false);
 
         if (ctx.parametros() != null) {
             inserirParametrosNoEscopo(ctx.parametros());
         }
 
-        for (var decl : ctx.declaracao_local()) {
-            visit(decl);
-        }
-        for (var cmd : ctx.cmd()) {
-            visit(cmd);
-        }
+        for (var decl : ctx.declaracao_local()) visit(decl);
+        for (var cmd : ctx.cmd()) visit(cmd);
 
-        dentroFuncao = estadoAnterior;
+        escopoPermiteRetorno.pop();
         escopos.abandonarEscopo();
     }
 
     private void visitarFuncao(JanderParser.FuncaoContext ctx) {
         String nome = ctx.IDENT().getText();
-
-        JanderParser.Tipo_estendidoContext te = ctx.tipo_estendido();
-        boolean ehPonteiro = te.PONTEIRO_OP() != null;
-        TipoLA tipoRetorno;
-        if (te.tipo_basico_ident().tipo_basico() != null) {
-            tipoRetorno = AnalisadorSemanticoUtils.stringParaTipo(
-                    te.tipo_basico_ident().tipo_basico().getText(), ehPonteiro);
-        } else {
-            String nomeTipo = te.tipo_basico_ident().IDENT().getText();
-            var entradaTipo = escopos.verificar(nomeTipo);
-            tipoRetorno = (entradaTipo != null) ? entradaTipo.tipo : TipoLA.TIPO_INDEFINIDO;
-        }
-
+        TipoLA tipoRetorno = obterTipoEstendido(ctx.tipo_estendido());
         List<TipoLA> tiposParam = new ArrayList<>();
         List<String> nomesRegParam = new ArrayList<>();
+
         if (ctx.parametros() != null) {
             coletarTiposParametros(ctx.parametros(), tiposParam, nomesRegParam);
         }
 
         TabelaDeSimbolos escopoAtual = escopos.obterEscopoAtual();
         if (escopoAtual.existe(nome)) {
-            AnalisadorSemanticoUtils.adicionarErroSemantico(ctx.IDENT().getSymbol(),
-                    "identificador " + nome + " ja declarado anteriormente");
+            AnalisadorSemanticoUtils.adicionarErroSemantico(ctx.IDENT().getSymbol(), "identificador " + nome + " ja declarado anteriormente");
         } else {
-            escopoAtual.adicionarFuncaoOuProcedimento(nome, tipoRetorno,
-                    CategoriaSimbolos.FUNCAO, tiposParam, nomesRegParam);
+            escopoAtual.adicionarFuncaoOuProcedimento(nome, tipoRetorno, CategoriaSimbolos.FUNCAO, tiposParam, nomesRegParam);
         }
 
         escopos.criarNovoEscopo();
-        boolean estadoAnterior = dentroFuncao;
-        dentroFuncao = true; 
+        escopoPermiteRetorno.push(true);
 
         if (ctx.parametros() != null) {
             inserirParametrosNoEscopo(ctx.parametros());
         }
 
-        for (var decl : ctx.declaracao_local()) {
-            visit(decl);
-        }
-        for (var cmd : ctx.cmd()) {
-            visit(cmd);
-        }
+        for (var decl : ctx.declaracao_local()) visit(decl);
+        for (var cmd : ctx.cmd()) visit(cmd);
 
-        dentroFuncao = estadoAnterior;
+        escopoPermiteRetorno.pop();
         escopos.abandonarEscopo();
     }
 
@@ -142,7 +128,7 @@ public class AnalisadorSemantico extends JanderBaseVisitor<Void> {
         for (var ident : ctx.identificador()) {
             verificarIdentificadorDeclarado(ident);
         }
-        return super.visitCmdLeia(ctx);
+        return null;
     }
 
     @Override
@@ -150,280 +136,158 @@ public class AnalisadorSemantico extends JanderBaseVisitor<Void> {
         for (var expr : ctx.expressao()) {
             AnalisadorSemanticoUtils.verificarTipo(escopos, expr);
         }
-        return super.visitCmdEscreva(ctx);
+        return null;
     }
 
     @Override
     public Void visitCmdAtribuicao(JanderParser.CmdAtribuicaoContext ctx) {
-        String nome = ctx.identificador().IDENT(0).getText();
-        var entrada = escopos.verificar(nome);
+        boolean ehDesreferenciacao = ctx.PONTEIRO_OP() != null;
+        String prefixo = ehDesreferenciacao ? "^" : "";
+        String nome = prefixo + identificadorCompleto(ctx.identificador());
 
-        if (entrada == null) {
+        TipoLA tipoEsq = AnalisadorSemanticoUtils.verificarTipoIdentificador(
+                escopos, ctx.identificador(), ehDesreferenciacao
+        );
+        TipoLA tipoDir = AnalisadorSemanticoUtils.verificarTipo(escopos, ctx.expressao());
+
+        boolean destinoEhPonteiroBruto = 
+            tipoEsq == TipoLA.PONTEIRO_INTEIRO || 
+            tipoEsq == TipoLA.PONTEIRO_REAL || 
+            tipoEsq == TipoLA.PONTEIRO_LITERAL || 
+            tipoEsq == TipoLA.PONTEIRO_LOGICO || 
+            tipoEsq == TipoLA.PONTEIRO_REGISTRO;
+
+        if (!ehDesreferenciacao && destinoEhPonteiroBruto) {
+            return null;
+        }
+
+        if (!AnalisadorSemanticoUtils.tiposCompativeisAtribuicao(tipoEsq, null, tipoDir, null)) {
             AnalisadorSemanticoUtils.adicionarErroSemantico(
                     ctx.identificador().IDENT(0).getSymbol(),
-                    "identificador " + nome + " nao declarado");
-        } else {
-            TipoLA tipoVar = entrada.tipo;
-            String nomeRegVar = entrada.nomeRegistro;
-
-            if (ctx.PONTEIRO_OP() != null) {
-                tipoVar = AnalisadorSemanticoUtils.desreferenciarPonteiro(tipoVar);
-                nomeRegVar = null;
-            }
-
-            TipoLA tipoExpr = AnalisadorSemanticoUtils.verificarTipo(escopos, ctx.expressao());
-            String nomeRegExpr = obterNomeRegistroExpressao(ctx.expressao());
-
-            if (!AnalisadorSemanticoUtils.tiposCompativeisAtribuicao(
-                    tipoVar, nomeRegVar, tipoExpr, nomeRegExpr)) {
-                AnalisadorSemanticoUtils.adicionarErroSemantico(
-                        ctx.identificador().IDENT(0).getSymbol(),
-                        "atribuicao nao compativel para " + nome);
-            }
+                    "atribuicao nao compativel para " + nome
+            );
         }
-        return super.visitCmdAtribuicao(ctx);
+        return null;
     }
 
-    
-    @Override
-    public Void visitCmdChamada(JanderParser.CmdChamadaContext ctx) {
-        String nome = ctx.IDENT().getText();
-        var entrada = escopos.verificar(nome);
-
-        if (entrada == null) {
-            AnalisadorSemanticoUtils.adicionarErroSemantico(ctx.IDENT().getSymbol(),
-                    "identificador " + nome + " nao declarado");
-            return super.visitCmdChamada(ctx);
-        }
-
-        int numArgs = ctx.expressao().size();
-        int numParams = entrada.tiposParametros.size();
-
-        if (numArgs != numParams) {
-            AnalisadorSemanticoUtils.adicionarErroSemantico(ctx.IDENT().getSymbol(),
-                    "incompatibilidade de parametros na chamada de " + nome);
-            return super.visitCmdChamada(ctx);
-        }
-
-        boolean incompativel = false;
-        for (int i = 0; i < numArgs; i++) {
-            TipoLA tipoArg = AnalisadorSemanticoUtils.verificarTipo(escopos, ctx.expressao(i));
-            String nomeRegArg = obterNomeRegistroExpressao(ctx.expressao(i));
-            TipoLA tipoParam = entrada.tiposParametros.get(i);
-            String nomeRegParam = entrada.nomesRegistroParametros.get(i);
-
-            if (!AnalisadorSemanticoUtils.tiposCompativeisParametro(
-                    tipoParam, nomeRegParam, tipoArg, nomeRegArg)) {
-                incompativel = true;
-                break;
-            }
-        }
-
-        if (incompativel) {
-            AnalisadorSemanticoUtils.adicionarErroSemantico(ctx.IDENT().getSymbol(),
-                    "incompatibilidade de parametros na chamada de " + nome);
-        }
-
-        return super.visitCmdChamada(ctx);
-    }
-
-    
     @Override
     public Void visitCmdRetorne(JanderParser.CmdRetorneContext ctx) {
-        if (!dentroFuncao) {
+        if (escopoPermiteRetorno.isEmpty() || !escopoPermiteRetorno.peek()) {
             AnalisadorSemanticoUtils.adicionarErroSemantico(
                     ctx.RETORNE().getSymbol(),
-                    "comando retorne nao permitido nesse escopo");
+                    "comando retorne nao permitido nesse escopo"
+            );
         }
-        return super.visitCmdRetorne(ctx);
+        return null;
     }
 
-    @Override
-    public Void visitCmdEnquanto(JanderParser.CmdEnquantoContext ctx) {
-        AnalisadorSemanticoUtils.verificarTipo(escopos, ctx.expressao());
-        return super.visitCmdEnquanto(ctx);
-    }
+    private void processarDeclaracaoVariavel(JanderParser.VariavelContext ctx, CategoriaSimbolos categoria) {
+        TipoLA tipo = obterTipoVariavel(ctx);
+        Map<String, TipoLA> campos = null;
+        String nomeTipoMestre = null;
 
-    
-    @Override
-    public Void visitCmdSe(JanderParser.CmdSeContext ctx) {
-        AnalisadorSemanticoUtils.verificarTipo(escopos, ctx.expressao());
-        return super.visitCmdSe(ctx);
-    }
-
-    @Override
-    public Void visitCmdFaca(JanderParser.CmdFacaContext ctx) {
-        AnalisadorSemanticoUtils.verificarTipo(escopos, ctx.expressao());
-        return super.visitCmdFaca(ctx);
-    }
-
-    private void processarDeclaracaoVariavel(JanderParser.VariavelContext ctx,
-            CategoriaSimbolos categoria) {
-        TipoLA tipo;
-        String nomeRegistro = null;
+        if (ctx.tipo().tipo_estendido() != null 
+                && ctx.tipo().tipo_estendido().tipo_basico_ident().IDENT() != null) {
+            nomeTipoMestre = ctx.tipo().tipo_estendido().tipo_basico_ident().IDENT().getText();
+            var entradaTipo = escopos.verificar(nomeTipoMestre);
+            if (entradaTipo != null) {
+                campos = entradaTipo.camposRegistro;
+            }
+        }
 
         if (ctx.tipo().registro() != null) {
-            tipo = TipoLA.REGISTRO;
-        } else {
-            JanderParser.Tipo_estendidoContext te = ctx.tipo().tipo_estendido();
-            boolean ehPonteiro = te.PONTEIRO_OP() != null;
-            JanderParser.Tipo_basico_identContext tbi = te.tipo_basico_ident();
-
-            if (tbi.tipo_basico() != null) {
-                tipo = AnalisadorSemanticoUtils.stringParaTipo(
-                        tbi.tipo_basico().getText(), ehPonteiro);
-            } else {
-                String nomeTipo = tbi.IDENT().getText();
-                var entradaTipo = escopos.verificar(nomeTipo);
-
-                if (entradaTipo == null) {
-                    AnalisadorSemanticoUtils.adicionarErroSemantico(
-                            tbi.IDENT().getSymbol(),
-                            "tipo " + nomeTipo + " nao declarado");
-                    tipo = TipoLA.TIPO_INDEFINIDO;
-                } else {
-                    tipo = ehPonteiro ? TipoLA.PONTEIRO_REGISTRO : entradaTipo.tipo;
-                    nomeRegistro = nomeTipo;
+            campos = new HashMap<>();
+            for (var varReg : ctx.tipo().registro().variavel()) {
+                TipoLA tipoCampo = obterTipoVariavel(varReg);
+                for (var ident : varReg.identificador()) {
+                    campos.put(ident.IDENT(0).getText(), tipoCampo);
                 }
             }
         }
 
         for (var ident : ctx.identificador()) {
-            String nome = ident.IDENT(0).getText();
-            verificarEInserirSimbolo(ident.IDENT(0).getSymbol(), nome, tipo,
-                    categoria, nomeRegistro);
+            verificarEInserirSimbolo(
+                    ident.IDENT(0).getSymbol(),
+                    ident.IDENT(0).getText(),
+                    tipo,
+                    categoria,
+                    nomeTipoMestre, // Salva o tipo mestre para amparar aninhamentos futuros
+                    campos
+                );
         }
     }
 
-   
-    private void coletarTiposParametros(JanderParser.ParametrosContext ctx,
-            List<TipoLA> tiposParam, List<String> nomesRegParam) {
+    private TipoLA obterTipoVariavel(JanderParser.VariavelContext ctx) {
+        if (ctx.tipo().registro() != null) {
+            return TipoLA.REGISTRO;
+        }
+        return obterTipoEstendido(ctx.tipo().tipo_estendido());
+    }
 
+    private TipoLA obterTipoEstendido(JanderParser.Tipo_estendidoContext ctx) {
+        boolean ponteiro = ctx.PONTEIRO_OP() != null;
+        if (ctx.tipo_basico_ident().tipo_basico() != null) {
+            return AnalisadorSemanticoUtils.stringParaTipo(ctx.tipo_basico_ident().tipo_basico().getText(), ponteiro);
+        }
+        return TipoLA.REGISTRO;
+    }
+
+    private void coletarTiposParametros(JanderParser.ParametrosContext ctx, List<TipoLA> tiposParam, List<String> nomesRegParam) {
         for (var param : ctx.parametro()) {
-            JanderParser.Tipo_estendidoContext te = param.tipo_estendido();
-            boolean ehPonteiro = te.PONTEIRO_OP() != null;
-            JanderParser.Tipo_basico_identContext tbi = te.tipo_basico_ident();
-
-            TipoLA tipo;
-            String nomeReg = null;
-
-            if (tbi.tipo_basico() != null) {
-                tipo = AnalisadorSemanticoUtils.stringParaTipo(
-                        tbi.tipo_basico().getText(), ehPonteiro);
-            } else {
-                String nomeTipo = tbi.IDENT().getText();
-                var entradaTipo = escopos.verificar(nomeTipo);
-                if (entradaTipo != null) {
-                    tipo = ehPonteiro ? TipoLA.PONTEIRO_REGISTRO : entradaTipo.tipo;
-                    nomeReg = nomeTipo;
-                } else {
-                    tipo = TipoLA.TIPO_INDEFINIDO;
-                }
-            }
-
+            TipoLA tipo = obterTipoEstendido(param.tipo_estendido());
             for (var ident : param.identificador()) {
                 tiposParam.add(tipo);
-                nomesRegParam.add(nomeReg);
+                nomesRegParam.add(null);
             }
         }
     }
 
-    
     private void inserirParametrosNoEscopo(JanderParser.ParametrosContext ctx) {
         for (var param : ctx.parametro()) {
-            JanderParser.Tipo_estendidoContext te = param.tipo_estendido();
-            boolean ehPonteiro = te.PONTEIRO_OP() != null;
-            JanderParser.Tipo_basico_identContext tbi = te.tipo_basico_ident();
+            TipoLA tipo = obterTipoEstendido(param.tipo_estendido());
+            Map<String, TipoLA> campos = null;
+            String nomeTipoMestre = null;
 
-            TipoLA tipo;
-            String nomeReg = null;
-
-            if (tbi.tipo_basico() != null) {
-                tipo = AnalisadorSemanticoUtils.stringParaTipo(
-                        tbi.tipo_basico().getText(), ehPonteiro);
-            } else {
-                String nomeTipo = tbi.IDENT().getText();
-                var entradaTipo = escopos.verificar(nomeTipo);
+            if (param.tipo_estendido().tipo_basico_ident().IDENT() != null) {
+                nomeTipoMestre = param.tipo_estendido().tipo_basico_ident().IDENT().getText();
+                var entradaTipo = escopos.verificar(nomeTipoMestre);
                 if (entradaTipo != null) {
-                    tipo = ehPonteiro ? TipoLA.PONTEIRO_REGISTRO : entradaTipo.tipo;
-                    nomeReg = nomeTipo;
-                } else {
-                    tipo = TipoLA.TIPO_INDEFINIDO;
+                    campos = entradaTipo.camposRegistro;
                 }
             }
 
             for (var ident : param.identificador()) {
-                String nomeParam = ident.IDENT(0).getText();
-                TabelaDeSimbolos escopoAtual = escopos.obterEscopoAtual();
-                if (!escopoAtual.existe(nomeParam)) {
-                    escopoAtual.adicionar(nomeParam, tipo,
-                            CategoriaSimbolos.PARAMETRO, nomeReg);
-                }
+                escopos.obterEscopoAtual().adicionar(
+                        ident.IDENT(0).getText(),
+                        tipo,
+                        CategoriaSimbolos.PARAMETRO,
+                        nomeTipoMestre,
+                        campos
+                );
             }
         }
     }
 
-    
     private void verificarIdentificadorDeclarado(JanderParser.IdentificadorContext ctx) {
         String nome = ctx.IDENT(0).getText();
         if (!escopos.existeEmQualquerEscopo(nome)) {
-            AnalisadorSemanticoUtils.adicionarErroSemantico(ctx.IDENT(0).getSymbol(),
-                    "identificador " + nome + " nao declarado");
+            AnalisadorSemanticoUtils.adicionarErroSemantico(
+                    ctx.IDENT(0).getSymbol(),
+                    "identificador " + identificadorCompleto(ctx) + " nao declarado"
+            );
         }
     }
 
-    
-    private void verificarEInserirSimbolo(org.antlr.v4.runtime.Token token,
-            String nome, TipoLA tipo, CategoriaSimbolos categoria,
-            String nomeRegistro) {
+    private void verificarEInserirSimbolo(org.antlr.v4.runtime.Token token, String nome, TipoLA tipo, CategoriaSimbolos categoria, String nomeRegistro, Map<String, TipoLA> campos) {
         TabelaDeSimbolos escopoAtual = escopos.obterEscopoAtual();
         if (escopoAtual.existe(nome)) {
-            AnalisadorSemanticoUtils.adicionarErroSemantico(token,
-                    "identificador " + nome + " ja declarado anteriormente");
+            AnalisadorSemanticoUtils.adicionarErroSemantico(token, "identificador " + nome + " ja declarado anteriormente");
         } else {
-            escopoAtual.adicionar(nome, tipo, categoria, nomeRegistro);
+            escopoAtual.adicionar(nome, tipo, categoria, nomeRegistro, campos);
         }
     }
 
-    
-    private TipoLA obterTipoDoContexto(JanderParser.TipoContext ctx) {
-        if (ctx.registro() != null) return TipoLA.REGISTRO;
-        var te = ctx.tipo_estendido();
-        boolean ehPonteiro = te.PONTEIRO_OP() != null;
-        if (te.tipo_basico_ident().tipo_basico() != null) {
-            return AnalisadorSemanticoUtils.stringParaTipo(
-                    te.tipo_basico_ident().tipo_basico().getText(), ehPonteiro);
-        }
-        return TipoLA.TIPO_INDEFINIDO;
-    }
-
-    
-    private String obterNomeRegistroExpressao(JanderParser.ExpressaoContext ctx) {
-        try {
-            var tl = ctx.termo_logico(0);
-            if (tl == null) return null;
-            var fl = tl.fator_logico(0);
-            if (fl == null) return null;
-            var pl = fl.parcela_logica();
-            if (pl.exp_relacional() == null) return null;
-            var er = pl.exp_relacional();
-            if (er.exp_aritmetica().size() != 1) return null;
-            var ea = er.exp_aritmetica(0);
-            if (ea.termo().size() != 1) return null;
-            var t = ea.termo(0);
-            if (t.fator().size() != 1) return null;
-            var f = t.fator(0);
-            if (f.parcela().size() != 1) return null;
-            var p = f.parcela(0);
-            if (p.parcela_unario() == null) return null;
-            var pu = p.parcela_unario();
-            if (pu.identificador() == null) return null;
-
-            String nome = pu.identificador().IDENT(0).getText();
-            var entrada = escopos.verificar(nome);
-            return (entrada != null) ? entrada.nomeRegistro : null;
-        } catch (Exception e) {
-            return null;
-        }
+    private String identificadorCompleto(JanderParser.IdentificadorContext ctx) {
+        return ctx.getText();
     }
 }

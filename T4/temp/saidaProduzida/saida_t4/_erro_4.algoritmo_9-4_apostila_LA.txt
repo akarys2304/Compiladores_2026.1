@@ -1,1 +1,2 @@
+Linha 44: incompatibilidade de parametros na chamada de menorInteiro
 Fim da compilacao
