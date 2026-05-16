@@ -1,4 +1,3 @@
 Linha 10: identificador tVinho ja declarado anteriormente
-Linha 13: atribuicao nao compativel para vinhoCaro
-Linha 28: identificador vinhocaro nao declarado
+Linha 28: identificador vinhocaro.tipoVinho nao declarado
 Fim da compilacao
