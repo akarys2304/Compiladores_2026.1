@@ -117,11 +117,9 @@ public class AnalisadorSemanticoUtils {
         if (ctx.NUM_REAL() != null) {
             return TipoLA.REAL;
         }
-        if (ctx.identificador() != null) {
-            return verificarTipoIdentificador(escopos, ctx.identificador(), ctx.PONTEIRO_OP() != null);
-        }
-
-        if (ctx.IDENT() != null) {
+        // Chamada de função: IDENT ABREPAR args FECHAPAR — deve vir ANTES de identificador
+        // pois ambos começam com IDENT e o ANTLR pode capturar como identificador
+        if (ctx.IDENT() != null && ctx.ABREPAR() != null) {
             String nome = ctx.IDENT().getText();
             var entrada = escopos.verificar(nome);
 
@@ -138,14 +136,19 @@ public class AnalisadorSemanticoUtils {
                 for (int i = 0; i < argumentos.size(); i++) {
                     TipoLA tipoArg = verificarTipo(escopos, argumentos.get(i));
                     TipoLA tipoParam = entrada.tiposParametros.get(i);
-                    if (!tiposCompativeis(tipoParam, tipoArg)) {
+                    if (!tiposCompativeisParametro(tipoParam, tipoArg)) {
                         adicionarErroSemantico(ctx.IDENT().getSymbol(), "incompatibilidade de parametros na chamada de " + nome);
-                        break; 
+                        break;
                     }
                 }
             }
 
             return entrada.tipo;
+        }
+
+        // Identificador simples (variável, campo de registro, ponteiro)
+        if (ctx.identificador() != null) {
+            return verificarTipoIdentificador(escopos, ctx.identificador(), ctx.PONTEIRO_OP() != null);
         }
 
         if (ctx.expressao() != null && !ctx.expressao().isEmpty()) {
@@ -198,6 +201,10 @@ public class AnalisadorSemanticoUtils {
         }
 
         return tipoAtual;
+    }
+
+    public static boolean tiposCompativeisParametro(TipoLA esperado, TipoLA recebido) {
+        return esperado == recebido;
     }
 
     public static boolean tiposCompativeis(TipoLA t1, TipoLA t2) {
