@@ -1,10 +1,14 @@
-# Trabalho 3 - Compiladores
+# Trabalho 4 - Compiladores
 Alunos:
 - Karys Cristina da Silva Barbosa - 811871
 - Nathália Brasilino Gimenes - 812076
 - Pedro Henrique Ghiotto - 812115
 
-Este projeto foi desenvolvido utilizando a linguagem de programação Java, criado com Maven para facilitar os detalhes de compilação e build. O trabalho implementa um analisador sintático para a linguagem LA, utilizando ANTLR4 para geração do léxico e da gramática. O analisador detecta e reporta erros léxicos e sintáticos como símbolos não identificados, cadeias literais não fechadas, comentários não fechados e erros de estrutura do programa.
+Este projeto foi desenvolvido utilizando a linguagem de programação Java, criado com Maven para facilitar os detalhes de compilação e build. 
+
+O trabalho implementa um analisador léxico, sintático e semântico para a linguagem LA, utilizando ANTLR4 para geração do léxico e da gramática. O analisador detecta e reporta erros léxicos e sintáticos como símbolos não identificados, cadeias literais não fechadas, erros de atribuição e compatibilidade de variáveis entre outros. 
+
+Essa etapa do projeto inclui-se a análise de novas análises de erros, que incluem-se agora a análise de ponteiros, funções e registros.
 
 ## Como compilar o arquivo Jander.g4 para gerar a gramática que será lida pelo compilador
 ```
@@ -16,16 +20,20 @@ mvn clean compile
 mvn clean package
 ```
 
-Após compilar e buildar o projeto já é possível executar o código do nosso analisador sintático.
+Após compilar e buildar o projeto já é possível executar o código do nosso analisador sintático. 
+Ao rodar este comando o seguinte arquivo aparecerá na pasta de target: 
+```
+target/T4-1.0-SNAPSHOT-jar-with-dependencies.jar
+```
 
 ## Como rodar o analisador sintático
 ```
-java -jar target/T3-1.0-SNAPSHOT-jar-with-dependencies.jar (caminho arquivo entrada) (caminho arquivo saida)
+java -jar target/T4-1.0-SNAPSHOT-jar-with-dependencies.jar (caminho arquivo entrada) (caminho arquivo saida)
 ```
 
 ## Exemplo de uso
 ```
-java -jar target/T3-1.0-SNAPSHOT-jar-with-dependencies.jar entrada.txt saida.txt
+java -jar target/T4-1.0-SNAPSHOT-jar-with-dependencies.jar entrada.txt saida.txt
 ```
 
 Em caso de erro, a saída conterá a linha e a descrição do problema encontrado, seguida de `Fim da compilacao`. Se nenhum erro for encontrado, o arquivo de saída será gerado vazio.
