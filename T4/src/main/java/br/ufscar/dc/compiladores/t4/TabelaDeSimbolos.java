@@ -8,154 +8,63 @@ import java.util.Map;
 public class TabelaDeSimbolos {
 
     public enum TipoLA {
-        INTEIRO,
-        REAL,
-        LITERAL,
-        LOGICO,
-        REGISTRO,
-        PONTEIRO_INTEIRO,
-        PONTEIRO_REAL,
-        PONTEIRO_LITERAL,
-        PONTEIRO_LOGICO,
-        PONTEIRO_REGISTRO,
-        VOID,
-        TIPO_INDEFINIDO
+        INTEIRO, REAL, LITERAL, LOGICO, REGISTRO,
+        PONTEIRO_INTEIRO, PONTEIRO_REAL, PONTEIRO_LITERAL, PONTEIRO_LOGICO, PONTEIRO_REGISTRO,
+        VOID, TIPO_INDEFINIDO
     }
 
     public enum CategoriaSimbolos {
-        VARIAVEL,
-        CONSTANTE,
-        PROCEDIMENTO,
-        FUNCAO,
-        TIPO,
-        PARAMETRO
+        VARIAVEL, CONSTANTE, PROCEDIMENTO, FUNCAO, TIPO, PARAMETRO
     }
 
     public static class EntradaTabelaDeSimbolos {
-
         public final String nome;
         public final TipoLA tipo;
         public final CategoriaSimbolos categoria;
-
         public final String nomeRegistro;
 
-        public final List<TipoLA> tiposParametros;
-
-        public final List<String> nomesRegistroParametros;
-
+        /** Campos do registro: nome → tipo. Null para não-registros. */
         public final Map<String, TipoLA> camposRegistro;
 
-        public EntradaTabelaDeSimbolos(
-                String nome,
-                TipoLA tipo,
-                CategoriaSimbolos categoria,
-                String nomeRegistro,
-                List<TipoLA> tiposParametros,
-                List<String> nomesRegistroParametros,
-                Map<String, TipoLA> camposRegistro
-        ) {
+        /** Tipos dos parâmetros formais (para funções e procedimentos). */
+        public final List<TipoLA> tiposParametros;
 
+        public EntradaTabelaDeSimbolos(String nome, TipoLA tipo, CategoriaSimbolos categoria,
+                String nomeRegistro, Map<String, TipoLA> camposRegistro,
+                List<TipoLA> tiposParametros) {
             this.nome = nome;
             this.tipo = tipo;
             this.categoria = categoria;
             this.nomeRegistro = nomeRegistro;
-
-            this.tiposParametros =
-                    tiposParametros != null
-                            ? tiposParametros
-                            : new ArrayList<>();
-
-            this.nomesRegistroParametros =
-                    nomesRegistroParametros != null
-                            ? nomesRegistroParametros
-                            : new ArrayList<>();
-
-            this.camposRegistro =
-                    camposRegistro != null
-                            ? camposRegistro
-                            : new HashMap<>();
+            this.camposRegistro = camposRegistro;
+            this.tiposParametros = tiposParametros != null ? tiposParametros : new ArrayList<>();
         }
     }
 
     private final Map<String, EntradaTabelaDeSimbolos> tabela;
 
     public TabelaDeSimbolos() {
-        tabela = new HashMap<>();
+        this.tabela = new HashMap<>();
     }
 
-    public void adicionar(
-            String nome,
-            TipoLA tipo,
-            CategoriaSimbolos categoria
-    ) {
-
-        adicionar(
-                nome,
-                tipo,
-                categoria,
-                null,
-                null
-        );
+    /** Insere variável simples. */
+    public void adicionar(String nome, TipoLA tipo, CategoriaSimbolos categoria) {
+        adicionar(nome, tipo, categoria, null, null);
     }
 
-    public void adicionar(
-            String nome,
-            TipoLA tipo,
-            CategoriaSimbolos categoria,
-            String nomeRegistro
-    ) {
-
-        adicionar(
-                nome,
-                tipo,
-                categoria,
-                nomeRegistro,
-                null
-        );
+    /** Insere variável com nomeRegistro e campos. */
+    public void adicionar(String nome, TipoLA tipo, CategoriaSimbolos categoria,
+            String nomeRegistro, Map<String, TipoLA> camposRegistro) {
+        tabela.put(nome, new EntradaTabelaDeSimbolos(nome, tipo, categoria,
+                nomeRegistro, camposRegistro, null));
     }
 
-    public void adicionar(
-            String nome,
-            TipoLA tipo,
-            CategoriaSimbolos categoria,
-            String nomeRegistro,
-            Map<String, TipoLA> camposRegistro
-    ) {
-
-        tabela.put(
-                nome,
-                new EntradaTabelaDeSimbolos(
-                        nome,
-                        tipo,
-                        categoria,
-                        nomeRegistro,
-                        null,
-                        null,
-                        camposRegistro
-                )
-        );
-    }
-
-    public void adicionarFuncaoOuProcedimento(
-            String nome,
-            TipoLA tipoRetorno,
-            CategoriaSimbolos categoria,
-            List<TipoLA> tiposParametros,
-            List<String> nomesRegistroParametros
-    ) {
-
-        tabela.put(
-                nome,
-                new EntradaTabelaDeSimbolos(
-                        nome,
-                        tipoRetorno,
-                        categoria,
-                        null,
-                        tiposParametros,
-                        nomesRegistroParametros,
-                        null
-                )
-        );
+    /** Insere função ou procedimento com lista de tipos de parâmetros. */
+    public void adicionarFuncaoOuProcedimento(String nome, TipoLA tipoRetorno,
+            CategoriaSimbolos categoria, List<TipoLA> tiposParametros,
+            List<String> nomesRegParam) {
+        tabela.put(nome, new EntradaTabelaDeSimbolos(nome, tipoRetorno, categoria,
+                null, null, tiposParametros));
     }
 
     public boolean existe(String nome) {
@@ -167,14 +76,7 @@ public class TabelaDeSimbolos {
     }
 
     public TipoLA verificarTipo(String nome) {
-
-        EntradaTabelaDeSimbolos entrada =
-                tabela.get(nome);
-
-        if (entrada == null) {
-            return TipoLA.TIPO_INDEFINIDO;
-        }
-
-        return entrada.tipo;
+        EntradaTabelaDeSimbolos e = tabela.get(nome);
+        return (e != null) ? e.tipo : TipoLA.TIPO_INDEFINIDO;
     }
 }

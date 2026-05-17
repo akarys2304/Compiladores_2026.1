@@ -269,13 +269,9 @@ public class AnalisadorSemantico extends JanderBaseVisitor<Void> {
     }
 
     private void verificarIdentificadorDeclarado(JanderParser.IdentificadorContext ctx) {
-        String nome = ctx.IDENT(0).getText();
-        if (!escopos.existeEmQualquerEscopo(nome)) {
-            AnalisadorSemanticoUtils.adicionarErroSemantico(
-                    ctx.IDENT(0).getSymbol(),
-                    "identificador " + identificadorCompleto(ctx) + " nao declarado"
-            );
-        }
+        // Delega para verificarTipoIdentificador, que valida tanto o nome base
+        // quanto os campos de registro (ex: vinho.Preco — P maiúsculo = campo inválido).
+        AnalisadorSemanticoUtils.verificarTipoIdentificador(escopos, ctx, false);
     }
 
     private void verificarEInserirSimbolo(org.antlr.v4.runtime.Token token, String nome, TipoLA tipo, CategoriaSimbolos categoria, String nomeRegistro, Map<String, TipoLA> campos) {
