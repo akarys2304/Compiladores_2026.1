@@ -139,6 +139,13 @@ public class AnalisadorSemantico extends JanderBaseVisitor<Void> {
         return null;
     }
 
+    
+    @Override
+    public Void visitCmdSe(JanderParser.CmdSeContext ctx) {
+        AnalisadorSemanticoUtils.verificarTipo(escopos, ctx.expressao());
+        return super.visitCmdSe(ctx);
+    }
+
     @Override
     public Void visitCmdAtribuicao(JanderParser.CmdAtribuicaoContext ctx) {
         boolean ehDesreferenciacao = ctx.PONTEIRO_OP() != null;

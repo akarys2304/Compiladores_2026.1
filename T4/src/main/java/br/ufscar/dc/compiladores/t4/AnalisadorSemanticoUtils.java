@@ -213,8 +213,9 @@ public class AnalisadorSemanticoUtils {
     }
 
     public static boolean tiposCompativeisAtribuicao(TipoLA destino, String nomeDestino, TipoLA origem, String nomeOrigem) {
+        //melhor análise das atribuições compatíveis, deixando menos geral e proporcionando uma melhor análise
         if (destino == TipoLA.TIPO_INDEFINIDO || origem == TipoLA.TIPO_INDEFINIDO) {
-            return true;
+        return true; 
         }
         if (destino == origem) {
             return true;
