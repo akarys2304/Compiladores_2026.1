@@ -1,0 +1,15 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdbool.h>
+
+int main() {
+	registronome:literalidade:inteirofim_registro reg;
+	reg.nome = "Maria";
+	reg.idade = 24;
+	printf("%d", reg.nome);
+	printf(" tem ");
+	printf("%d", reg.idade);
+	printf(" anos");
+    return 0;
+}
