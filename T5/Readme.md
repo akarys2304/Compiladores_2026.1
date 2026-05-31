@@ -6,7 +6,7 @@ Alunos:
 
 Este projeto foi desenvolvido utilizando a linguagem de programação Java, criado com Maven para facilitar os detalhes de compilação e build. 
 
-O trabalho implementa um analisador léxico, sintático e semântico para a linguagem LA, utilizando ANTLR4 para geração do léxico e da gramática. O analisador detecta e reporta erros léxicos e sintáticos como símbolos não identificados, cadeias literais não fechadas, erros de atribuição e compatibilidade de variáveis entre outros. 
+O trabalho implementa um analisador léxico, sintático, semântico e também agora o Gerador de Códigos C, utilizando ANTLR4 para geração do léxico e da gramática. O analisador detecta e reporta erros léxicos e sintáticos como símbolos não identificados, cadeias literais não fechadas, erros de atribuição e compatibilidade de variáveis entre outros. 
 
 Essa etapa do projeto inclui-se a geração de códigos C. 
 
@@ -26,14 +26,16 @@ Ao rodar este comando o seguinte arquivo aparecerá na pasta de target:
 target/T5-1.0-SNAPSHOT-jar-with-dependencies.jar
 ```
 
-## Como rodar o analisador sintático
+## Como rodar os analisadores e o gerador de código para um algoritmo específico e para um arquivo de saída específico
 ```
 java -jar target/T5-1.0-SNAPSHOT-jar-with-dependencies.jar (caminho arquivo entrada) (caminho arquivo saida)
 ```
 
+Recomenda-se que o arquivo de saída possua a extensão .c, para que assim, seja mais fácil testar o código gerado. 
+
 ## Exemplo de uso
 ```
-java -jar target/T5-1.0-SNAPSHOT-jar-with-dependencies.jar entrada.txt saida.txt
+java -jar target/T5-1.0-SNAPSHOT-jar-with-dependencies.jar entrada.txt saida.c
 ```
 
-Em caso de erro, a saída conterá a linha e a descrição do problema encontrado, seguida de `Fim da compilacao`. Se nenhum erro for encontrado, o arquivo de saída será gerado vazio.
+O código C gerado, será com base no algoritmo JANDER passado como entrada. Caso algum erro semântico seja encontrado, o código não será gerado. 
