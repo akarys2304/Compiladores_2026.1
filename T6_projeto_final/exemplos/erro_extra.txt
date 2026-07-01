@@ -1,0 +1,16 @@
+aluno Lucas {
+    objetivo voar
+
+    treino A {
+        exercicio Supino {
+            series 4
+            repeticoes 10
+        }
+    }
+    treino A {
+        exercicio Remada {
+            series 3
+            repeticoes 12
+        }
+    }
+}

@@ -1,0 +1,8 @@
+aluno Bia {
+    treino A {
+        exercicio Supino {
+            series 0
+            repeticoes 10
+        }
+    }
+}

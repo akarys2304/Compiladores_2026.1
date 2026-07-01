@@ -1,0 +1,3 @@
+Erro(s) semantico(s) encontrado(s):
+  - [linha 10] Treino 'A' duplicado para o aluno 'Lucas'.
+  - [linha 1] Objetivo 'voar' inválido para o aluno 'Lucas'. Valores aceitos: [mobilidade, resistencia, emagrecimento, hipertrofia, condicionamento]

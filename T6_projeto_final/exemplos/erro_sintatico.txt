@@ -1,0 +1,7 @@
+aluno Erro {
+    treino A {
+        exercicio Supino {
+            series 4
+            repeticoes 10
+        }
+}

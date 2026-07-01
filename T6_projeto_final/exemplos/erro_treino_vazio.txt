@@ -1,0 +1,10 @@
+aluno Ana {
+    treino A {
+        exercicio Supino {
+            series 4
+            repeticoes 10
+        }
+    }
+    treino B {
+    }
+}

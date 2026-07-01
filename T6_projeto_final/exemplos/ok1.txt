@@ -1,0 +1,39 @@
+aluno Nathalia {
+    idade 22
+    peso 58
+    objetivo hipertrofia
+
+    treino A {
+        exercicio Supino {
+            series 4
+            repeticoes 10
+        }
+        exercicio TricepsPulley {
+            series 3
+            repeticoes 12
+        }
+    }
+    treino B {
+        exercicio Agachamento {
+            series 4
+            repeticoes 12
+        }
+        exercicio LegPress {
+            series 4
+            repeticoes 15
+        }
+    }
+}
+
+aluno Joao {
+    treino A {
+        exercicio PuxadaFrontal {
+            series 4
+            repeticoes 10
+        }
+        exercicio Remada {
+            series 3
+            repeticoes 12
+        }
+    }
+}

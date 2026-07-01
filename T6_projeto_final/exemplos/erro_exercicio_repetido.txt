@@ -1,0 +1,12 @@
+aluno Carlos {
+    treino A {
+        exercicio Supino {
+            series 4
+            repeticoes 10
+        }
+        exercicio Supino {
+            series 3
+            repeticoes 8
+        }
+    }
+}
