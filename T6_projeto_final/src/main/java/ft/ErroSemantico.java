@@ -1,9 +1,7 @@
 package ft;
 
-/**
- * Representa um erro encontrado durante a análise semântica,
- * contendo a linha do código-fonte onde ocorreu e uma mensagem descritiva.
- */
+//erro durante a análise semântica
+//linha onde ocorreu o erro e mensagem
 public class ErroSemantico {
 
     private final int linha;

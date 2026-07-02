@@ -14,28 +14,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+//entrada do compilador da linguagem FichaTreino
 
-/**
- * Ponto de entrada do compilador da linguagem FichaTreino.
- *
- * Uso:
- *   java -jar fichatreino.jar caminho/para/arquivo.ft [prefixo-saida]
- *
- * A entrada pode ter qualquer extensão (.ft ou .txt, por exemplo) — o
- * conteúdo é interpretado da mesma forma.
- *
- * Saídas geradas (no mesmo diretório do arquivo de entrada, a menos que um
- * prefixo de saída seja informado):
- *   - <nome>.txt  : ficha de treino em texto puro, OU mensagens de erro
- *                   (sintático/semântico), caso a compilação falhe.
- *   - <nome>.html : ficha de treino em HTML (só gerado se não houver erros).
- *
- * Fases executadas:
- *  1) Análise léxica/sintática (ANTLR - FichaTreinoLexer / FichaTreinoParser)
- *  2) Construção do modelo em memória (ModeloBuilder)
- *  3) Análise semântica (SemanticChecker)
- *  4) Interpretação / geração da ficha de treino em TXT e HTML (FichaGenerator)
- */
 public class Main {
 
     public static void main(String[] args) {
@@ -50,7 +30,7 @@ public class Main {
         Path saidaHtml = Paths.get(baseSaida.toString() + ".html");
 
         try {
-            // ===== 1) Análise léxica/sintática =====
+            //análise léxica/sintática 
             CommonTokenStream tokens = new CommonTokenStream(
                     new FichaTreinoLexer(CharStreams.fromFileName(caminho)));
 
@@ -74,12 +54,12 @@ public class Main {
                 System.exit(2);
             }
 
-            // ===== 2) Construção do modelo =====
+            // construção do modelo 
             ModeloBuilder builder = new ModeloBuilder();
             builder.visit(arvore);
             List<Aluno> alunos = builder.getAlunos();
 
-            // ===== 3) Análise semântica =====
+            // análise semântica
             SemanticChecker checker = new SemanticChecker();
             checker.verificar(alunos);
 
@@ -92,7 +72,7 @@ public class Main {
                 System.exit(3);
             }
 
-            // ===== 4) Geração / interpretação =====
+            // geração / interpretação 
             FichaGenerator gerador = new FichaGenerator();
             String texto = gerador.gerarTexto(alunos);
             String html = gerador.gerarHtml(alunos);
@@ -110,7 +90,7 @@ public class Main {
         }
     }
 
-    /** Grava as mensagens de erro no arquivo .txt de saída e também as imprime no terminal. */
+    // Grava as mensagens de erro no arquivo .txt de saída e também as imprime no terminal
     private static void escreverErros(Path saidaTxt, String titulo, List<String> mensagens) throws IOException {
         StringBuilder sb = new StringBuilder();
         sb.append(titulo).append("\n");
@@ -123,10 +103,7 @@ public class Main {
         System.err.println(sb);
         System.err.println("Compilacao interrompida. Detalhes em: " + saidaTxt.toAbsolutePath());
     }
-
-    /** Gera o caminho base de saída (sem extensão): mesmo diretório do arquivo de
-     *  entrada, com o nome original seguido de "_saida" (para não sobrescrever
-     *  o arquivo de entrada quando ele também tiver extensão .txt). */
+    //gera o caminho de saída
     private static Path caminhoBaseSaida(String caminhoEntrada) {
         Path entrada = Paths.get(caminhoEntrada);
         String nome = entrada.getFileName().toString();

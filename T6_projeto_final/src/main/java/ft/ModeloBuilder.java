@@ -6,15 +6,9 @@ import ft.model.Treino;
 
 import java.util.ArrayList;
 import java.util.List;
+//percorre a árvore sintática gerada pelo ANTLR
+//traduz a árvore concreta em um modelo de domínio
 
-/**
- * Percorre a árvore sintática gerada pelo ANTLR e constrói uma representação
- * em memória (lista de {@link Aluno}) mais simples de manipular nas fases
- * de análise semântica e geração de saída.
- *
- * Esta classe NÃO faz nenhuma verificação semântica - apenas "traduz" a
- * árvore concreta em um modelo de domínio.
- */
 public class ModeloBuilder extends FichaTreinoBaseVisitor<Object> {
 
     private final List<Aluno> alunos = new ArrayList<>();

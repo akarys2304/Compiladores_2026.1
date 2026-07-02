@@ -8,26 +8,11 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+// realiza a análise semântica do programa, as verificações que vão além do que a gramática garante
 
-/**
- * Realiza a análise semântica do programa, ou seja, verificações que vão
- * além do que a gramática (análise léxica/sintática) consegue garantir.
- *
- * Verificações implementadas:
- *  1) Nome de exercício não pode se repetir dentro do mesmo treino.
- *  2) O valor de "series" deve ser um número inteiro maior que zero.
- *  3) O valor de "repeticoes" deve ser um número inteiro maior que zero.
- *  4) Todo treino deve conter pelo menos um exercício (treino não pode ser vazio).
- *
- * Verificações extras (bônus):
- *  5) Nome de treino não pode se repetir dentro do mesmo aluno.
- *  6) Se o atributo "objetivo" for informado, deve ser um dos valores
- *     reconhecidos pela linguagem (hipertrofia, resistencia, emagrecimento,
- *     condicionamento, mobilidade).
- */
 public class SemanticChecker {
 
-    /** Conjunto de objetivos válidos para o atributo opcional "objetivo". */
+    //objetivos válidos para o atributo opcional "objetivo"
     private static final Set<String> OBJETIVOS_VALIDOS = new HashSet<>(List.of(
             "hipertrofia", "resistencia", "emagrecimento", "condicionamento", "mobilidade"
     ));
@@ -42,9 +27,7 @@ public class SemanticChecker {
         return !erros.isEmpty();
     }
 
-    /**
-     * Executa todas as verificações semânticas sobre a lista de alunos.
-     */
+    //executa todas as verificações semânticas sobre a lista de alunos
     public void verificar(List<Aluno> alunos) {
         for (Aluno aluno : alunos) {
             verificarAluno(aluno);
@@ -52,7 +35,7 @@ public class SemanticChecker {
     }
 
     private void verificarAluno(Aluno aluno) {
-        // Verificação extra (5): nomes de treino não podem repetir dentro do aluno
+        //verificação: nomes de treino não podem repetir dentro do aluno
         Set<String> nomesTreinos = new HashSet<>();
         for (Treino treino : aluno.getTreinos()) {
             if (!nomesTreinos.add(treino.getNome())) {
@@ -62,7 +45,7 @@ public class SemanticChecker {
             verificarTreino(aluno, treino);
         }
 
-        // Verificação extra (6): objetivo, se informado, deve ser válido
+        //verificação extra:objetivo, se informado, deve ser válido
         if (aluno.getObjetivo() != null && !OBJETIVOS_VALIDOS.contains(aluno.getObjetivo())) {
             erros.add(new ErroSemantico(aluno.getLinha(),
                     "Objetivo '" + aluno.getObjetivo() + "' inválido para o aluno '" + aluno.getNome()
@@ -72,7 +55,7 @@ public class SemanticChecker {
 
     private void verificarTreino(Aluno aluno, Treino treino) {
 
-        // Verificação (4): treino não pode estar vazio
+        // treino não pode estar vazio
         if (treino.getExercicios().isEmpty()) {
             erros.add(new ErroSemantico(treino.getLinha(),
                     "Treino '" + treino.getNome() + "' do aluno '" + aluno.getNome()
@@ -81,7 +64,7 @@ public class SemanticChecker {
             return;
         }
 
-        // Verificação (1): exercício não pode repetir dentro do treino
+        //exercício não pode repetir dentro do treino
         Set<String> nomesExercicios = new HashSet<>();
         for (Exercicio ex : treino.getExercicios()) {
             if (!nomesExercicios.add(ex.getNome())) {
@@ -90,7 +73,7 @@ public class SemanticChecker {
                                 + "' do aluno '" + aluno.getNome() + "'."));
             }
 
-            // Verificação (2): series > 0
+            //series > 0
             if (ex.getSeries() <= 0) {
                 erros.add(new ErroSemantico(ex.getLinha(),
                         "Exercício '" + ex.getNome() + "' (treino '" + treino.getNome()
@@ -98,7 +81,7 @@ public class SemanticChecker {
                                 + ex.getSeries() + ". O valor deve ser maior que zero."));
             }
 
-            // Verificação (3): repeticoes > 0
+            //repeticoes > 0
             if (ex.getRepeticoes() <= 0) {
                 erros.add(new ErroSemantico(ex.getLinha(),
                         "Exercício '" + ex.getNome() + "' (treino '" + treino.getNome()

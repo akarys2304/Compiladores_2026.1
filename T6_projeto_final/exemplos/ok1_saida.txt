@@ -1,0 +1,31 @@
+=========================================
+FICHA DE TREINO - Nathalia
+=========================================
+Dados: idade=22 anos | peso=58 kg | objetivo=hipertrofia
+
+-- Treino A --
+ 1. Supino             |  4 series x 10 repeticoes | volume:  40
+ 2. TricepsPulley      |  3 series x 12 repeticoes | volume:  36
+   Series totais do treino: 7 | Volume total: 76
+
+-- Treino B --
+ 1. Agachamento        |  4 series x 12 repeticoes | volume:  48
+ 2. LegPress           |  4 series x 15 repeticoes | volume:  60
+   Series totais do treino: 8 | Volume total: 108
+
+=========================================
+FICHA DE TREINO - Joao
+=========================================
+
+-- Treino A --
+ 1. PuxadaFrontal      |  4 series x 10 repeticoes | volume:  40
+ 2. Remada             |  3 series x 12 repeticoes | volume:  36
+   Series totais do treino: 7 | Volume total: 76
+
+=========================================
+RESUMO GERAL
+=========================================
+Alunos: 2
+Treinos: 3
+Exercicios: 6
+Volume total (series x repeticoes, somado): 260

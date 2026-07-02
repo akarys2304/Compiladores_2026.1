@@ -6,20 +6,10 @@ import ft.model.Treino;
 
 import java.util.List;
 
-/**
- * Fase de geração de código / interpretação: percorre o modelo já validado
- * e produz uma página HTML organizada (a "ficha de treino" formatada),
- * incluindo estatísticas como volume total por exercício, por treino e
- * resumo geral.
- *
- * Isso representa o "algo útil ou interessante feito com a linguagem"
- * exigido pela especificação do trabalho (item GCI).
- */
+//produz a ficha de treino em HTML e em texto
 public class FichaGenerator {
-
-    /**
-     * Gera a página HTML completa para todos os alunos do programa.
-     */
+    //gera a página HTML completa
+    
     public String gerarHtml(List<Aluno> alunos) {
         int totalAlunos = alunos.size();
         int totalTreinos = 0;
@@ -99,10 +89,7 @@ public class FichaGenerator {
         return montarPagina(corpo.toString(), resumo);
     }
 
-    /**
-     * Gera a versão em texto puro (.txt) da ficha de treino, com a mesma
-     * informação apresentada no HTML, em formato tabular simples.
-     */
+    //gera a ficha de treino em formato de texto 
     public String gerarTexto(List<Aluno> alunos) {
         StringBuilder sb = new StringBuilder();
 
@@ -204,7 +191,7 @@ public class FichaGenerator {
         return String.valueOf(valor);
     }
 
-    /** Escapa caracteres especiais de HTML para evitar quebra de markup ou XSS. */
+    // Escapa caracteres especiais de HTML 
     private String escapar(String texto) {
         return texto
                 .replace("&", "&amp;")
