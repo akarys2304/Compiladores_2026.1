@@ -33,7 +33,7 @@
                 <configuration>
                     <visitor>true</visitor>
                     <listener>true</listener>
-                    <sourceDirectory>${basedir}</sourceDirectory>
+                    <sourceDirectory>${basedir}/src/main/antlr4</sourceDirectory>
                     <includes>
                         <include>FichaTreino.g4</include>
                     </includes>

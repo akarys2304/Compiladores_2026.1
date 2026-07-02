@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Ficha de Treino</title>
+  <style>
+    body { font-family: Arial, Helvetica, sans-serif; max-width: 800px; margin: 2rem auto; padding: 0 1rem; color: #222; background: #f7f7f9; }
+    h1 { text-align: center; }
+    section.aluno { background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 1rem 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+    section.resumo { background: #eef5ff; border: 1px solid #cfe2ff; border-radius: 8px; padding: 1rem 1.5rem; }
+    h2 { margin-top: 0; border-bottom: 2px solid #4a90d9; padding-bottom: 0.3rem; }
+    .dados { color: #555; margin-top: -0.5rem; }
+    .treino { margin-top: 1rem; }
+    .treino h3 { margin-bottom: 0.3rem; color: #4a90d9; }
+    table { width: 100%; border-collapse: collapse; margin-bottom: 0.5rem; }
+    th, td { border: 1px solid #ddd; padding: 0.4rem 0.6rem; text-align: center; }
+    th { background: #f0f0f5; }
+    tr:nth-child(even) { background: #fafafa; }
+    .totais { margin: 0.3rem 0 0; font-size: 0.95rem; }
+    .resumo ul { list-style: none; padding-left: 0; }
+    .resumo li { padding: 0.2rem 0; }
+  </style>
+</head>
+<body>
+  <h1>Ficha de Treino</h1>
+  <section class="aluno">
+    <h2>Nathalia</h2>
+    <p class="dados">Idade: <strong>22 anos</strong> &nbsp;|&nbsp; Peso: <strong>58 kg</strong> &nbsp;|&nbsp; Objetivo: <strong>hipertrofia</strong></p>
+    <div class="treino">
+      <h3>Treino A</h3>
+      <table>
+        <thead><tr><th>#</th><th>Exercício</th><th>Séries</th><th>Repetições</th><th>Volume</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>Supino</td><td>4</td><td>10</td><td>40</td></tr>
+          <tr><td>2</td><td>TricepsPulley</td><td>3</td><td>12</td><td>36</td></tr>
+        </tbody>
+      </table>
+      <p class="totais">Séries totais do treino: <strong>7</strong> &nbsp;|&nbsp; Volume total: <strong>76</strong></p>
+    </div>
+    <div class="treino">
+      <h3>Treino B</h3>
+      <table>
+        <thead><tr><th>#</th><th>Exercício</th><th>Séries</th><th>Repetições</th><th>Volume</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>Agachamento</td><td>4</td><td>12</td><td>48</td></tr>
+          <tr><td>2</td><td>LegPress</td><td>4</td><td>15</td><td>60</td></tr>
+        </tbody>
+      </table>
+      <p class="totais">Séries totais do treino: <strong>8</strong> &nbsp;|&nbsp; Volume total: <strong>108</strong></p>
+    </div>
+  </section>
+  <section class="aluno">
+    <h2>Joao</h2>
+    <div class="treino">
+      <h3>Treino A</h3>
+      <table>
+        <thead><tr><th>#</th><th>Exercício</th><th>Séries</th><th>Repetições</th><th>Volume</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>PuxadaFrontal</td><td>4</td><td>10</td><td>40</td></tr>
+          <tr><td>2</td><td>Remada</td><td>3</td><td>12</td><td>36</td></tr>
+        </tbody>
+      </table>
+      <p class="totais">Séries totais do treino: <strong>7</strong> &nbsp;|&nbsp; Volume total: <strong>76</strong></p>
+    </div>
+  </section>
+  <section class="resumo">
+    <h2>Resumo geral</h2>
+    <ul>
+      <li>Alunos: <strong>2</strong></li>
+      <li>Treinos: <strong>3</strong></li>
+      <li>Exercícios: <strong>6</strong></li>
+      <li>Volume total (séries × repetições, somado): <strong>260</strong></li>
+    </ul>
+  </section>
+</body>
+</html>
