@@ -126,4 +126,5 @@ A pasta [`exemplos/`](exemplos/) contém:
 
 Exemplo de Saída:
 Ok1.txt
+
 ![image alt](https://github.com/akarys2304/Compiladores_2026.1/blob/59c8c162a072987194e2642237405584c0b60260/T6_projeto_final/1000512413.jpg)
