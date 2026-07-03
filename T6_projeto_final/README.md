@@ -128,3 +128,21 @@ Exemplo de Saída:
 Ok1.txt
 
 ![image alt](https://github.com/akarys2304/Compiladores_2026.1/blob/59c8c162a072987194e2642237405584c0b60260/T6_projeto_final/1000512413.jpg)
+
+
+## 5. Tratamento de erros
+
+Além da análise léxica e sintática realizada pelo ANTLR4, o compilador executa uma série de validações semânticas para garantir que a ficha de treino esteja consistente.
+
+Os seguintes casos são tratados:
+
+Caso	Descrição
+Exercícios repetidos	Impede que um mesmo exercício seja cadastrado mais de uma vez dentro do mesmo treino.
+Treinos duplicados	Verifica se um aluno possui dois ou mais treinos com o mesmo nome.
+Valores inválidos	Garante que series e repeticoes sejam maiores que zero.
+Treino vazio	Detecta treinos criados sem nenhum exercício.
+Objetivo inválido	Valida o atributo opcional objetivo, que deve possuir um dos seguintes valores: hipertrofia, resistencia, emagrecimento, condicionamento ou mobilidade.
+Erros sintáticos	Detecta problemas na estrutura da linguagem, como ausência de chaves, parênteses ou outros elementos obrigatórios da gramática.
+Quando algum desses erros é encontrado, o compilador informa a mensagem correspondente e interrompe a geração do arquivo HTML.
+
+Obs: O diretório exemplos/ do repositório contém arquivos para demonstrar tanto o funcionamento correto da linguagem quanto os diferentes tipos de erros tratados pelo compilador.
