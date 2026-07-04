@@ -2,7 +2,7 @@
 # FichaTreino (FT) — Compilador para fichas de treino de musculação
 
 Trabalho 6 da disciplina **Construção de Compiladores** (Prof. Daniel Lucrédio).
-
+Link da apresentação: <https://drive.google.com/drive/folders/18jLr9Kw4Yg5eBgC80yHXAIk_zI009sZf?usp=sharing> 
 Integrantes:
 -   Karys Cristina da Silva Barbosa - 811871
 -   Nathália Brasilino Gimenes - 812076
